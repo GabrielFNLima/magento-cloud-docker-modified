@@ -169,7 +169,6 @@ failed=0
 processed=0
 failed_images=()
 
-declare -A target_map
 declare -A base_check_cache
 
 run_target() {
@@ -262,20 +261,19 @@ if [[ $CHANGED_ONLY -eq 1 ]]; then
     diff_range="HEAD~1...HEAD"
   fi
 
-  while IFS= read -r file; do
-    [[ -n "$file" ]] || continue
-    IFS='/' read -r _ _ php_version cloud_version node_variant _ <<< "$file"
-    [[ -n "$php_version" && -n "$cloud_version" && -n "$node_variant" ]] || continue
-    target_map["$php_version|$cloud_version|$node_variant"]=1
-  done < <(git diff --name-only "$diff_range" -- 'images/php-nodejs/*/*/*/Dockerfile')
+  mapfile -t changed_targets < <(
+    git diff --name-only "$diff_range" -- 'images/php-nodejs/*/*/*/Dockerfile' \
+      | awk -F/ 'NF>=6 {print $3 "|" $4 "|" $5}' \
+      | sort -u
+  )
 
-  if [[ ${#target_map[@]} -eq 0 ]]; then
+  if [[ ${#changed_targets[@]} -eq 0 ]]; then
     echo "No changed Dockerfiles under images/php-nodejs in $diff_range."
     echo "Done. Built and tested: 0 | Failed: 0 | Skipped (by filters/missing dirs): 0"
     exit 0
   fi
 
-  for key in "${!target_map[@]}"; do
+  for key in "${changed_targets[@]}"; do
     IFS='|' read -r php_version cloud_version node_variant <<< "$key"
     node_path="$IMAGES_DIR/$php_version/$cloud_version/$node_variant"
     run_target "$php_version" "$cloud_version" "$node_variant" "$node_path"
