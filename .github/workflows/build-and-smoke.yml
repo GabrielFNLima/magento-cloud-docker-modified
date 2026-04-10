@@ -1,0 +1,34 @@
+name: Build and Smoke
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Docker info
+        run: docker version
+
+      - name: Run build-and-smoke (changed Dockerfiles in PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          chmod +x ./scripts/build-and-smoke.sh
+          ./scripts/build-and-smoke.sh \
+            --changed-only \
+            --diff-base "${{ github.event.pull_request.base.sha }}" \
+            --diff-head "${{ github.event.pull_request.head.sha }}"
+
+      - name: Run build-and-smoke (manual trigger, latest version)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          chmod +x ./scripts/build-and-smoke.sh
+          ./scripts/build-and-smoke.sh

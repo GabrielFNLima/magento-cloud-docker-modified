@@ -13,9 +13,9 @@ These images are based on the official [Magento Cloud Docker repository](https:/
 Our custom images extend the official Magento Cloud Docker PHP images with the following additions:
 
 - PHP-FPM with Node.js pre-installed
-- Multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3)
-- Magento Cloud Docker version (1.4.0, 1.3.7)
-- Node.js versions (18lts)
+- Multiple PHP versions (7.4, 8.0, 8.1, 8.2, 8.3, 8.4)
+- Magento Cloud Docker versions (1.4.7, 1.4.3, 1.4.0, 1.3.7)
+- Node.js variants (`node24`, `node20`, `nodelts`, and legacy `node18`)
 
 ## How to Use These Images
 
@@ -33,20 +33,20 @@ To use these modified images in your Magento Cloud Docker development environmen
 
 ```yaml
 fpm:
-  image: magento/magento-cloud-docker-php:8.2-fpm-1.4.0
+  image: magento/magento-cloud-docker-php:8.2-fpm-1.4.7
 
 fpm_xdebug:
-  image: magento/magento-cloud-docker-php:8.2-fpm-1.4.0
+  image: magento/magento-cloud-docker-php:8.2-fpm-1.4.7
 ```
 
 **To:**
 
 ```yaml
 fpm:
-  image: devgfnl/magento-cloud-docker-php-node:8.2-fpm-node18-1.4.0
+  image: devgfnl/magento-cloud-docker-php-node:8.2-fpm-nodelts-1.4.7
 
 fpm_xdebug:
-  image: devgfnl/magento-cloud-docker-php-node:8.2-fpm-node18-1.4.0
+  image: devgfnl/magento-cloud-docker-php-node:8.2-fpm-nodelts-1.4.7
 ```
 
 #### Rebuild and Restart Your Containers
@@ -62,20 +62,16 @@ docker compose up -d
 
 ### Available Combinations
 
-#### PHP Versions
+#### Latest by PHP Line
 
-| PHP Version | Node.js Version | Image Tag                                                    |
-| ----------- | --------------- | ------------------------------------------------------------ |
-| 8.3         | 18              | `devgfnl/magento-cloud-docker-php-node:8.3-fpm-node18-1.4.0` |
-| 8.2         | 18              | `devgfnl/magento-cloud-docker-php-node:8.2-fpm-node18-1.4.0` |
-| 8.1         | 18              | `devgfnl/magento-cloud-docker-php-node:8.1-fpm-node18-1.4.0` |
-| 8.0         | 18              | `devgfnl/magento-cloud-docker-php-node:8.0-fpm-node18-1.4.0` |
-| 7.4         | 18              | `devgfnl/magento-cloud-docker-php-node:7.4-fpm-node18-1.4.0` |
-| 8.3         | 18              | `devgfnl/magento-cloud-docker-php-node:8.3-fpm-node18-1.3.7` |
-| 8.2         | 18              | `devgfnl/magento-cloud-docker-php-node:8.2-fpm-node18-1.3.7` |
-| 8.1         | 18              | `devgfnl/magento-cloud-docker-php-node:8.1-fpm-node18-1.3.7` |
-| 8.0         | 18              | `devgfnl/magento-cloud-docker-php-node:8.0-fpm-node18-1.3.7` |
-| 7.4         | 18              | `devgfnl/magento-cloud-docker-php-node:7.4-fpm-node18-1.3.7` |
+| PHP Version | Node.js Variant                | Image                                                                                                                                                                                                                                                                                                                      |
+| ----------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 8.4         | `node20/node24/nodelts`        | [1.4.7](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.4-fpm-nodelts-1.4.7)                                                                                                                                                                                                                         |
+| 8.3         | `node18/node20/node24/nodelts` | [1.4.7](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.3-fpm-nodelts-1.4.7), [1.4.0 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.3-fpm-node18-1.4.0), [1.3.7 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.3-fpm-node18-1.3.7) |
+| 8.2         | `node18/node20/node24/nodelts` | [1.4.7](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.2-fpm-nodelts-1.4.7), [1.4.0 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.2-fpm-node18-1.4.0), [1.3.7 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.2-fpm-node18-1.3.7) |
+| 8.1         | `node18/node20/node24/nodelts` | [1.4.7](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.1-fpm-nodelts-1.4.7), [1.4.0 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.1-fpm-node18-1.4.0), [1.3.7 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.1-fpm-node18-1.3.7) |
+| 8.0         | `node18/node20/node24/nodelts` | [1.4.3](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.0-fpm-nodelts-1.4.3), [1.4.0 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.0-fpm-node18-1.4.0), [1.3.7 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/8.0-fpm-node18-1.3.7) |
+| 7.4         | `node18/node20/node24/nodelts` | [1.4.3](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/7.4-fpm-nodelts-1.4.3), [1.4.0 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/7.4-fpm-node18-1.4.0), [1.3.7 (node18)](https://hub.docker.com/layers/devgfnl/magento-cloud-docker-php-node/7.4-fpm-node18-1.3.7) |
 
 ## Contributing
 
