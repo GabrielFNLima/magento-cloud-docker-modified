@@ -1,0 +1,78 @@
+name: Auto-generate new image variants
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      min_cloud_version:
+        description: 'Minimum cloud version to consider (default: 1.4.7)'
+        required: false
+        default: '1.4.7'
+      dry_run:
+        description: 'Dry-run (do not create files or open PR)'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate missing Dockerfiles
+        id: generate
+        env:
+          MIN_CLOUD_VERSION: ${{ github.event.inputs.min_cloud_version || '1.4.7' }}
+        run: |
+          chmod +x ./scripts/generate-images.sh
+          DRY_RUN_FLAG=""
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          ./scripts/generate-images.sh --min-cloud-version "$MIN_CLOUD_VERSION" $DRY_RUN_FLAG
+          echo "changed=$(git status --porcelain | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR if new Dockerfiles were created
+        if: steps.generate.outputs.changed != '0' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Collect summary of what was created
+          new_files=$(git status --porcelain | awk '{print $2}' | sort)
+          new_count=$(echo "$new_files" | wc -l | tr -d ' ')
+
+          branch="auto/new-image-variants-$(date +%Y%m%d)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add images/php-nodejs/
+          git commit -m "feat(images): add $new_count new image variant(s) detected from Docker Hub"
+          git push origin "$branch"
+
+          # Build PR body
+          file_list=$(echo "$new_files" | sed 's/^/- /')
+
+          gh pr create \
+            --title "feat(images): add new image variants detected from Docker Hub" \
+            --body "$(cat <<EOF
+          ## New image variants detected
+
+          The weekly Docker Hub scan found **${new_count}** new Dockerfile(s) to add:
+
+          ${file_list}
+
+          ## Checklist
+          - [ ] Smoke test passes (CI will run automatically on this PR)
+          - [ ] README table updated if needed
+          EOF
+          )" \
+            --base main \
+            --head "$branch" \
+            --label "automation"
